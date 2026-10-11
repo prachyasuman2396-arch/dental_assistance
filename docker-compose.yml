@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: dental_assistant_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: dental_agent_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dental_agent_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dental_assistant_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@db:5432/dental_agent_db
+      - DATABASE_SYNC_URL=postgresql+psycopg://postgres:postgrespassword@db:5432/dental_agent_db
+      - ENVIRONMENT=production
+      - DEBUG=false
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  pgdata:

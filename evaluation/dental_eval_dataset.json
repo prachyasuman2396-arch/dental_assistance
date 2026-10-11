@@ -1,0 +1,74 @@
+[
+  {
+    "id": "DENT-001",
+    "discipline": "Endodontics",
+    "topic": "Pulpal Diagnosis & Thermal Sensitivity",
+    "question": "What is the key pathophysiological difference between reversible pulpitis and symptomatic irreversible pulpitis regarding pain upon cold stimulus removal?",
+    "expected_answer_keywords": ["lingering pain", "A-delta fibers", "C-fibers", "vasodilation", "intrapulpal pressure"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "DENT-002",
+    "discipline": "Endodontics",
+    "topic": "Irrigation Protocols",
+    "question": "Why is 17% EDTA used in combination with sodium hypochlorite (NaOCl) during root canal preparation, and what is its specific effect on the smear layer?",
+    "expected_answer_keywords": ["chelating agent", "inorganic component", "smear layer removal", "dentinal tubules", "erosion"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "DENT-003",
+    "discipline": "Periodontology",
+    "topic": "Classification & Staging",
+    "question": "According to the 2018 AAP/EFP Classification, how is Periodontitis Stage III distinguished from Stage IV based on tooth loss and masticatory dysfunction?",
+    "expected_answer_keywords": ["tooth loss", "4 or fewer teeth", "5 or more teeth", "masticatory dysfunction", "bite collapse"],
+    "requires_research": true,
+    "complexity": "high"
+  },
+  {
+    "id": "DENT-004",
+    "discipline": "Dental Materials",
+    "topic": "Zirconia Bioceramics",
+    "question": "Explain the mechanism of 'transformation toughening' in 3Y-TZP zirconia ceramics when a microcrack propagates.",
+    "expected_answer_keywords": ["tetragonal to monoclinic", "volume expansion", "compressive stress", "crack tip", "arrest"],
+    "requires_research": false,
+    "complexity": "high"
+  },
+  {
+    "id": "DENT-005",
+    "discipline": "Pharmacology",
+    "topic": "Local Anesthetics",
+    "question": "How does tissue acidosis in an infected abscess reduce the efficacy of lidocaine, and what is the role of the uncharged base (RN)?",
+    "expected_answer_keywords": ["Henderson-Hasselbalch", "pKa", "lipid membrane", "uncharged base", "ionized cation"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "DENT-006",
+    "discipline": "Orthodontics",
+    "topic": "Biomechanics of Tooth Movement",
+    "question": "Describe the cellular events on the pressure side versus the tension side of the periodontal ligament during orthodontic tooth movement.",
+    "expected_answer_keywords": ["osteoclasts", "osteoblasts", "hyalinization", "RANKL", "bone remodeling"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "DENT-007",
+    "discipline": "Periodontology",
+    "topic": "Microbiology & Red Complex",
+    "question": "Which specific bacteria constitute Socransky's Red Complex in chronic periodontal disease, and what virulence factors do they express?",
+    "expected_answer_keywords": ["Porphyromonas gingivalis", "Tannerella forsythia", "Treponema denticola", "gingipains"],
+    "requires_research": true,
+    "complexity": "high"
+  },
+  {
+    "id": "DENT-008",
+    "discipline": "Operative Dentistry",
+    "topic": "Adhesive Dentistry & C-Factor",
+    "question": "What is the configuration factor (C-factor) in a Class I occlusal cavity preparation, and why does a high C-factor increase polymerisation shrinkage stress?",
+    "expected_answer_keywords": ["bonded to unbonded ratio", "5:1", "polymerization shrinkage", "debonding", "enamel margin"],
+    "requires_research": false,
+    "complexity": "medium"
+  }
+]

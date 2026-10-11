@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-base: #F8F7FC;
+    --bg-secondary: #F0EDFA;
+    --bg-elevated: #FFFFFF;
+    --bg-glass: rgba(255, 255, 255, 0.72);
+    --bg-glass-elevated: rgba(255, 255, 255, 0.88);
+    
+    --primary-lavender: #8D79D6;
+    --primary-violet: #6554B8;
+    --primary-lilac: #DCD3FF;
+    
+    --accent-rose: #F3DDEB;
+    --accent-blue: #DDE8FF;
+    --accent-teal: #B8E5DE;
+    
+    --text-primary: #25243A;
+    --text-secondary: #77748D;
+    --text-muted: #9E9BB3;
+    
+    --border-light: rgba(141, 121, 214, 0.16);
+    --border-luminous: rgba(141, 121, 214, 0.32);
+    --border-glass: rgba(255, 255, 255, 0.6);
+    
+    --shadow-soft: 0 4px 20px -2px rgba(101, 84, 184, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --shadow-elevated: 0 12px 36px -4px rgba(101, 84, 184, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    --shadow-pearl: 0 0 35px rgba(220, 211, 255, 0.45);
+  }
+
+  .dark {
+    --bg-base: #10101B;
+    --bg-secondary: #161627;
+    --bg-elevated: #1E1D33;
+    --bg-glass: rgba(22, 22, 39, 0.72);
+    --bg-glass-elevated: rgba(30, 29, 51, 0.85);
+    
+    --primary-lavender: #B6A4FF;
+    --primary-violet: #927BFA;
+    --primary-lilac: #322F55;
+    
+    --accent-rose: #E6B8D5;
+    --accent-blue: #9EC9FF;
+    --accent-teal: #94DED2;
+    
+    --text-primary: #F5F3FF;
+    --text-secondary: #B5B1CC;
+    --text-muted: #74718C;
+    
+    --border-light: rgba(182, 164, 255, 0.14);
+    --border-luminous: rgba(182, 164, 255, 0.3);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    
+    --shadow-soft: 0 4px 24px -2px rgba(0, 0, 0, 0.4), 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+    --shadow-elevated: 0 16px 40px -4px rgba(0, 0, 0, 0.6), 0 4px 14px -2px rgba(146, 123, 250, 0.1);
+    --shadow-pearl: 0 0 45px rgba(146, 123, 250, 0.35);
+  }
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-soft);
+}
+
+.glass-elevated {
+  background: var(--bg-glass-elevated);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-luminous);
+  box-shadow: var(--shadow-elevated);
+}
+
+.glass-input {
+  background: var(--bg-glass-elevated);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--border-light);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-input:focus-within {
+  border-color: var(--border-luminous);
+  box-shadow: 0 0 20px rgba(141, 121, 214, 0.18);
+}
+
+/* Custom Refined Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(141, 121, 214, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(141, 121, 214, 0.4);
+}
+
+/* Iridescent Text Gradient */
+.iridescent-text {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-lavender) 60%, var(--accent-rose) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pearl-glow {
+  box-shadow: var(--shadow-pearl);
+}
+
+/* Markdown prose enhancements */
+.prose-dental h1, .prose-dental h2, .prose-dental h3 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+.prose-dental p {
+  color: var(--text-primary);
+  line-height: 1.75;
+  margin-bottom: 0.85em;
+}
+
+.prose-dental strong {
+  color: var(--primary-violet);
+  font-weight: 600;
+}
+
+.dark .prose-dental strong {
+  color: var(--primary-lavender);
+}
+
+.prose-dental ul, .prose-dental ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.prose-dental li {
+  margin-bottom: 0.4em;
+  line-height: 1.65;
+}
+
+.prose-dental table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.25em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.prose-dental th {
+  background: var(--bg-secondary);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.prose-dental td {
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.prose-dental code {
+  background: var(--bg-secondary);
+  color: var(--primary-violet);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.dark .prose-dental code {
+  color: var(--primary-lavender);
+}
