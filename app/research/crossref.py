@@ -20,7 +20,7 @@ class CrossrefClient:
                     "filter": "type:journal-article",
                 }
                 headers = {
-                    "User-Agent": "DentalAIAssistant/1.0 (mailto:support@dentalagent.edu)"
+                    "User-Agent": "StudentAIAssistant/1.0 (mailto:support@studentagent.edu)"
                 }
 
                 url = f"{self.base_url}/works"

@@ -15,6 +15,10 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
     def dimension(self):
         return 384
 
+    @property
+    def model_name(self):
+        return "mock-minilm"
+
 
 @pytest.mark.asyncio
 async def test_vector_retriever_enforces_user_isolation():

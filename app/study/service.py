@@ -44,7 +44,7 @@ class StudyService:
         difficulty: str = "medium",
     ) -> List[QuizQuestionItem]:
         prompt = (
-            f"Generate {num_questions} high-yield dental examination MCQs on the topic: '{topic}'. "
+            f"Generate {num_questions} high-yield examination MCQs on the topic: '{topic}'. "
             f"Difficulty level: {difficulty}."
         )
         messages = [
@@ -101,7 +101,7 @@ class StudyService:
         difficulty: str = "medium",
     ) -> List[FlashcardItem]:
         prompt = (
-            f"Generate {count} active-recall dental study flashcards on the topic: '{topic}'. "
+            f"Generate {count} active-recall study flashcards on the topic: '{topic}'. "
             f"Difficulty: {difficulty}."
         )
         messages = [

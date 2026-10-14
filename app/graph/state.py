@@ -4,7 +4,7 @@ from typing_extensions import TypedDict
 
 class AgentState(TypedDict, total=False):
     """
-    Typed workflow state for the Dental AI Assistant LangGraph pipeline.
+    Typed workflow state for the Student AI Assistant LangGraph pipeline.
     Contains only workflow-essential, non-secret fields.
     """
     messages: List[Dict[str, Any]]
@@ -12,6 +12,11 @@ class AgentState(TypedDict, total=False):
     conversation_id: str
     document_id: Optional[str]
     academic_level: Optional[str]
+    
+    # Four types of memory integration
+    profile: Optional[Dict[str, Any]]
+    long_term_memories: List[Dict[str, Any]]
+    extracted_memories: List[Dict[str, Any]]
     
     # Classification & routing
     intent: str  # tutor, web_research, document_retrieval, hybrid_retrieval, study_tools

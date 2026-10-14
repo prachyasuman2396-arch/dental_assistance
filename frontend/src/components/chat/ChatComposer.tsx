@@ -71,7 +71,7 @@ export function ChatComposer({
     if (!file || !onUploadDocument) return;
 
     if (!file.name.toLowerCase().endsWith(".pdf")) {
-      alert("Please upload a PDF dental textbook or notes file.");
+      alert("Please upload a PDF textbook or notes file.");
       return;
     }
 
@@ -119,7 +119,7 @@ export function ChatComposer({
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Ask anything about dentistry, Sristi..."
+          placeholder="Ask anything about your courses, research, or study materials..."
           rows={1}
           className="w-full bg-transparent resize-none outline-none px-3 pt-2 pb-1 text-sm md:text-[15px] placeholder-[var(--text-muted)] text-[var(--text-primary)] max-h-[180px] leading-relaxed"
         />
@@ -172,7 +172,7 @@ export function ChatComposer({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              title="Upload Dental Textbook or Lecture Notes (PDF)"
+              title="Upload Textbook or Lecture Notes (PDF)"
               className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 transition-colors ml-1 cursor-pointer disabled:opacity-50"
             >
               <Paperclip className="w-4 h-4" />

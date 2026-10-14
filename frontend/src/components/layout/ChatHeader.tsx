@@ -29,7 +29,7 @@ export function ChatHeader({
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <h2 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-[240px] md:max-w-md">
-            {title || "Dental Study Session"}
+            {title || "Study Session"}
           </h2>
         </div>
       </div>

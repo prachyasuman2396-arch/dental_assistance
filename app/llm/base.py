@@ -27,3 +27,16 @@ class BaseLLMClient(abc.ABC):
     async def is_healthy(self) -> bool:
         """Check provider connectivity/credentials."""
         pass
+
+    @abc.abstractmethod
+    async def stream_generate(
+        self,
+        messages: List[LLMMessage],
+        model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        timeout: Optional[float] = None,
+    ):
+        """Asynchronously stream text tokens incrementally."""
+        pass
+

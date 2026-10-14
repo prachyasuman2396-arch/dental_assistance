@@ -22,7 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("sristi_theme") as Theme | null;
+    const saved = localStorage.getItem("student_theme") as Theme | null;
     if (saved === "light" || saved === "dark") {
       setThemeState(saved);
       document.documentElement.classList.toggle("dark", saved === "dark");
@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem("sristi_theme", newTheme);
+    localStorage.setItem("student_theme", newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 

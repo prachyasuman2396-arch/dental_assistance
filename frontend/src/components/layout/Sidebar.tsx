@@ -72,9 +72,9 @@ export function Sidebar({
               </div>
               <div>
                 <h1 className="font-semibold text-sm tracking-tight text-[var(--text-primary)]">
-                  Sristi AI
+                  Study AI
                 </h1>
-                <p className="text-[10px] text-[var(--text-muted)]">Dental Study Companion</p>
+                <p className="text-[10px] text-[var(--text-muted)]">AI Study Companion</p>
               </div>
             </div>
 
@@ -168,18 +168,18 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Bottom Profile Badge: Sristi Biswal */}
+        {/* Bottom Profile Badge: Student Scholar */}
         <div className="p-3 border-t border-[var(--border-light)] bg-black/2 dark:bg-white/2">
           <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-400 text-white flex items-center justify-center font-semibold text-xs shadow-sm">
-              SB
+              SS
             </div>
             <div className="truncate">
               <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                Sristi Biswal
+                Student Scholar
               </div>
               <div className="text-[10px] text-[var(--text-muted)] truncate">
-                BDS Dental Scholar
+                University Scholar
               </div>
             </div>
           </div>

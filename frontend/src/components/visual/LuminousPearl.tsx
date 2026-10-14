@@ -220,7 +220,7 @@ export function LuminousPearl({ className = "", size = 260 }: LuminousPearlProps
       ref={containerRef}
       className={`relative flex items-center justify-center select-none pointer-events-none ${className}`}
       style={{ width: size, height: size }}
-      aria-label="Sristi AI Luminous Pearl"
+      aria-label="Study AI Luminous Orb"
     />
   );
 }

@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Sristi AI — Personal Dental Study & Research Companion",
+  title: "Scholar AI — Personal Study & Research Companion",
   description:
-    "A personalized, premium 3D study and research assistant crafted for Sristi Biswal. Deep clinical concepts, board exam preparation, and biomedical literature research.",
+    "A personalized, premium study and research assistant crafted for students. Conceptual mastery, exam preparation, and academic literature research.",
 };
 
 export default function RootLayout({

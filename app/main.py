@@ -23,9 +23,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     description=(
-        "Production-oriented, domain-specific AI study and research assistant "
-        "designed exclusively for dental students. Integrates LangGraph, dual-LLM "
-        "routing (Groq + Gemini), pgvector document RAG, PubMed literature research, "
+        "Production-oriented AI study and research assistant "
+        "designed for students. Integrates LangGraph, dual-LLM "
+        "routing (Groq + Gemini), pgvector document RAG, scholarly literature research, "
         "and active-recall study tools."
     ),
     version="0.1.0",
@@ -56,7 +56,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
-            "detail": "An internal server error occurred while processing your dental assistant request.",
+            "detail": "An internal server error occurred while processing your request.",
             "error_type": exc.__class__.__name__,
         },
     )

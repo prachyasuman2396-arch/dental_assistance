@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     )
 
     # Application
-    APP_NAME: str = "Dental AI Study & Research Assistant"
+    APP_NAME: str = "AI Student Study & Research Assistant"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     PORT: int = 8000

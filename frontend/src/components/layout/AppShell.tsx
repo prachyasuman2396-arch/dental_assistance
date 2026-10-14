@@ -8,10 +8,10 @@ import { AmbientBackground } from "../visual/AmbientBackground";
 import { StudyToolsModal } from "../study/StudyToolsModal";
 import { LibraryModal } from "../documents/LibraryModal";
 import {
-  dentalApi,
+  studyApi,
   ChatMessage,
   ConversationItem,
-  DentalDocument,
+  StudyDocument,
 } from "@/services/api";
 
 export function AppShell() {
@@ -31,10 +31,10 @@ export function AppShell() {
   }, []);
 
   const checkHealthAndInit = async () => {
-    const health = await dentalApi.checkHealth();
+    const health = await studyApi.checkHealth();
     setIsBackendOnline(health.status !== "offline");
 
-    const convs = await dentalApi.getConversations();
+    const convs = await studyApi.getConversations();
     setConversations(convs);
     if (convs.length > 0) {
       // Auto-load most recent conversation
@@ -44,7 +44,7 @@ export function AppShell() {
 
   const selectConversation = async (id: string) => {
     setCurrentConversationId(id);
-    const msgs = await dentalApi.getMessages(id);
+    const msgs = await studyApi.getMessages(id);
     setMessages(msgs);
     setIsSidebarOpen(false);
   };
@@ -56,7 +56,7 @@ export function AppShell() {
   };
 
   const handleDeleteConversation = async (id: string) => {
-    const success = await dentalApi.deleteConversation(id);
+    const success = await studyApi.deleteConversation(id);
     if (success) {
       setConversations((prev) => prev.filter((c) => c.id !== id));
       if (currentConversationId === id) {
@@ -73,50 +73,112 @@ export function AppShell() {
       content: text,
       created_at: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, userMsg]);
+    
+    // Assistant streaming message placeholder
+    const assistantMsgId = `ast-${Date.now()}`;
+    const assistantPlaceholder: ChatMessage = {
+      id: assistantMsgId,
+      role: "assistant",
+      content: "",
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMsg, assistantPlaceholder]);
     setIsLoading(true);
 
+    let hasReceivedToken = false;
+
     try {
-      // 2. Call backend
-      const res = await dentalApi.sendChat(
+      await studyApi.streamChat(
         text,
         currentConversationId || undefined,
-        documentId
+        documentId,
+        {
+          onStart: async (data) => {
+            if (!currentConversationId && data.conversation_id) {
+              setCurrentConversationId(data.conversation_id);
+              const updatedConvs = await studyApi.getConversations();
+              setConversations(updatedConvs);
+            }
+          },
+          onToken: (data) => {
+            hasReceivedToken = true;
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMsgId
+                  ? {
+                      ...msg,
+                      content: msg.content + data.token,
+                      provider: data.provider || msg.provider,
+                      model: data.model || msg.model,
+                    }
+                  : msg
+              )
+            );
+          },
+          onCitation: (data) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMsgId
+                  ? { ...msg, citations: data.citations }
+                  : msg
+              )
+            );
+          },
+          onEnd: (data) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMsgId
+                  ? {
+                      ...msg,
+                      content: data.answer || msg.content,
+                      provider: data.provider || msg.provider,
+                      model: data.model || msg.model,
+                      latency_ms: data.latency_ms,
+                      citations: data.citations || msg.citations,
+                    }
+                  : msg
+              )
+            );
+          },
+          onError: (err) => {
+            if (!hasReceivedToken) {
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMsgId
+                    ? {
+                        ...msg,
+                        content:
+                          "I encountered a momentary issue processing that request. Please try again or rephrase your question.",
+                      }
+                    : msg
+                )
+              );
+            }
+          },
+        }
       );
-
-      // 3. Update or set conversation ID
-      if (!currentConversationId && res.conversation_id) {
-        setCurrentConversationId(res.conversation_id);
-        const updatedConvs = await dentalApi.getConversations();
-        setConversations(updatedConvs);
-      }
-
-      // 4. Append assistant response
-      const assistantMsg: ChatMessage = {
-        id: `ast-${Date.now()}`,
-        role: "assistant",
-        content: res.message,
-        provider: res.provider,
-        model: res.model,
-        latency_ms: res.latency_ms,
-        citations: res.citations,
-        created_at: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
     } catch (e: unknown) {
-      const fallbackMsg: ChatMessage = {
-        id: `err-${Date.now()}`,
-        role: "assistant",
-        content: "I'm having a brief connection issue right now. Please try your question again in a moment.",
-      };
-      setMessages((prev) => [...prev, fallbackMsg]);
+      if (!hasReceivedToken) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMsgId
+              ? {
+                  ...msg,
+                  content:
+                    "I'm having a brief connection issue right now. Please try your question again in a moment.",
+                }
+              : msg
+          )
+        );
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleUploadDocument = async (file: File): Promise<DentalDocument> => {
-    const doc = await dentalApi.uploadDocument(file);
+  const handleUploadDocument = async (file: File): Promise<StudyDocument> => {
+    const doc = await studyApi.uploadDocument(file);
     return doc;
   };
 

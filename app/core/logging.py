@@ -19,7 +19,7 @@ class SafeLogFilter(logging.Filter):
 
 def setup_logging(debug: bool = False) -> logging.Logger:
     level = logging.DEBUG if debug else logging.INFO
-    logger = logging.getLogger("dental_agent")
+    logger = logging.getLogger("study_agent")
     logger.setLevel(level)
 
     if not logger.handlers:

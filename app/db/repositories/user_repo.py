@@ -24,7 +24,7 @@ class UserRepository:
         email: str,
         password: str,
         full_name: Optional[str] = None,
-        academic_level: str = "Dental Student",
+        academic_level: str = "Student",
     ) -> User:
         user = User(
             email=email.lower().strip(),

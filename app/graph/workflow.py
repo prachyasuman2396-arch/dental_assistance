@@ -5,9 +5,9 @@ from app.graph.nodes import DentalGraphNodes
 from app.graph.routing import route_by_intent
 
 
-def create_dental_graph(nodes: DentalGraphNodes, checkpointer: BaseCheckpointSaver = None):
+def create_study_graph(nodes: DentalGraphNodes, checkpointer: BaseCheckpointSaver = None):
     """
-    Constructs and compiles the StateGraph workflow for the Dental AI Assistant.
+    Constructs and compiles the StateGraph workflow for the Student AI Assistant.
     """
     graph = StateGraph(AgentState)
 
@@ -53,3 +53,8 @@ def create_dental_graph(nodes: DentalGraphNodes, checkpointer: BaseCheckpointSav
     graph.add_edge("save_turn", END)
 
     return graph.compile(checkpointer=checkpointer)
+
+
+# Backwards compatibility alias
+create_dental_graph = create_study_graph
+

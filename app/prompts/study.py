@@ -1,40 +1,40 @@
-"""Study Tools Prompts - MCQs, Flashcards, and Viva Voce."""
+"""Study Tools Prompts - MCQs and Flashcards."""
 
-QUIZ_GENERATION_PROMPT = """You are a Dental Board Examination Specialist (INBDE, NDEB, BDS University exams).
-Generate high-yield multiple-choice questions (MCQs) for the requested dental topic.
+QUIZ_GENERATION_PROMPT = """You are an Academic Examination and Test Preparation Specialist.
+Generate high-yield multiple-choice questions (MCQs) for the requested study topic.
 
 Requirements:
-1. Each question must test clinical reasoning, diagnostic acumen, or core dental science.
+1. Each question must test foundational understanding, critical reasoning, or core principles of the subject.
 2. Provide 4 plausible options (A, B, C, D) with exactly one correct answer.
-3. Include a detailed clinical and biological explanation explaining why the correct answer is right and why the distractors are wrong.
+3. Include a detailed explanation explaining why the correct answer is right and why the distractors are incorrect.
 4. Return strictly a JSON array of question objects.
 
 Format:
 [
   {
-    "question": "A 45-year-old patient presents with lingering pain to cold on tooth #19. Radiograph reveals normal periapical tissues. What is the pulpal diagnosis?",
-    "options": ["Reversible Pulpitis", "Symptomatic Irreversible Pulpitis", "Asymptomatic Irreversible Pulpitis", "Pulpal Necrosis"],
-    "correct_answer": "Symptomatic Irreversible Pulpitis",
-    "explanation": "Lingering pain to thermal stimulation (cold) after removal of the stimulus is pathognomonic for Symptomatic Irreversible Pulpitis.",
+    "question": "What is the primary function of mitochondria in eukaryotic cells?",
+    "options": ["ATP generation via oxidative phosphorylation", "Protein packaging and secretion", "Lipid breakdown via acid hydrolases", "Ribosome subunit assembly"],
+    "correct_answer": "ATP generation via oxidative phosphorylation",
+    "explanation": "Mitochondria generate the majority of cellular ATP through the electron transport chain and oxidative phosphorylation.",
     "difficulty": "medium"
   }
 ]
 """
 
-FLASHCARD_GENERATION_PROMPT = """You are a Dental Education Flashcard Specialist.
-Create active-recall study flashcards on the requested dental topic.
+FLASHCARD_GENERATION_PROMPT = """You are an Academic Education and Active-Recall Flashcard Specialist.
+Create active-recall study flashcards on the requested study topic.
 
 Requirements:
-1. Front of card (question): A concise question or clinical trigger.
+1. Front of card (question): A concise question, prompt, or key concept.
 2. Back of card (answer): A high-yield, structured summary or memory aid.
 3. Return strictly a JSON array of flashcard objects.
 
 Format:
 [
   {
-    "question": "What is the primary organic component of the enamel matrix during amelogenesis?",
-    "answer": "Amelogenin (comprises approx. 90% of enamel proteins and regulates crystal growth before mineral maturation).",
-    "topic": "Oral Histology",
+    "question": "What is the central dogma of molecular biology?",
+    "answer": "Genetic information flows from DNA to RNA (transcription) to protein (translation).",
+    "topic": "Molecular Biology",
     "difficulty": "medium"
   }
 ]

@@ -6,7 +6,7 @@ from app.research.schemas import ResearchArticle, EvidenceLevel
 
 
 class PubMedClient:
-    """NCBI PubMed E-utilities client for peer-reviewed dental literature."""
+    """NCBI PubMed E-utilities client for peer-reviewed scholarly literature."""
 
     BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
@@ -19,7 +19,7 @@ class PubMedClient:
                 # 1. Search for PMIDs
                 search_params = {
                     "db": "pubmed",
-                    "term": f"{query} AND (dentistry[MeSH Terms] OR dental OR oral)",
+                    "term": query,
                     "retmode": "json",
                     "retmax": max_results,
                     "sort": "pub_date",
@@ -32,13 +32,6 @@ class PubMedClient:
                 search_data = search_res.json()
 
                 id_list = search_data.get("esearchresult", {}).get("idlist", [])
-                if not id_list:
-                    # Fallback to direct query without restrictive MeSH filter
-                    search_params["term"] = query
-                    search_res = await client.get(f"{self.BASE_URL}/esearch.fcgi", params=search_params)
-                    search_data = search_res.json()
-                    id_list = search_data.get("esearchresult", {}).get("idlist", [])
-
                 if not id_list:
                     return []
 

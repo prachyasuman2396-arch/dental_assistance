@@ -19,6 +19,40 @@ export interface CitationsMetadata {
   research_papers?: CitationItem[];
 }
 
+export interface StreamChatEvents {
+  onStart?: (data: { conversation_id: string }) => void;
+  onStatus?: (data: { status: string; message: string }) => void;
+  onCitation?: (data: { citations: CitationsMetadata }) => void;
+  onToken?: (data: { token: string; provider?: string; model?: string }) => void;
+  onEnd?: (data: {
+    conversation_id: string;
+    answer: string;
+    provider?: string;
+    model?: string;
+    latency_ms: number;
+    citations: CitationsMetadata;
+  }) => void;
+  onError?: (err: string) => void;
+}
+
+export interface UserProfileData {
+  preferred_name?: string;
+  academic_institution?: string;
+  academic_discipline?: string;
+  current_level?: string;
+  explanation_style?: string;
+  learning_goals?: string[];
+}
+
+export interface LongTermMemoryItem {
+  id: string;
+  memory_type: string;
+  topic?: string;
+  content: string;
+  importance: number;
+  created_at: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "system";
@@ -38,7 +72,7 @@ export interface ConversationItem {
   updated_at: string;
 }
 
-export interface DentalDocument {
+export interface StudyDocument {
   id: string;
   filename: string;
   file_size_bytes: number;
@@ -47,6 +81,8 @@ export interface DentalDocument {
   error_message?: string;
   created_at: string;
 }
+
+export type DentalDocument = StudyDocument;
 
 export interface QuizQuestion {
   question: string;
@@ -63,19 +99,19 @@ export interface Flashcard {
   difficulty: string;
 }
 
-class DentalApiClient {
+class StudyApiClient {
   private token: string | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("sristi_token");
+      this.token = localStorage.getItem("student_token");
     }
   }
 
   private setToken(tok: string) {
     this.token = tok;
     if (typeof window !== "undefined") {
-      localStorage.setItem("sristi_token", tok);
+      localStorage.setItem("student_token", tok);
     }
   }
 
@@ -90,7 +126,7 @@ class DentalApiClient {
   }
 
   /**
-   * Automatically ensure Sristi's authenticated session exists.
+   * Automatically ensure student authenticated session exists.
    */
   async ensureSession(): Promise<string> {
     if (this.token) return this.token;
@@ -101,8 +137,8 @@ class DentalApiClient {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "sristi.biswal@dental.edu",
-          password: "SristiPassword2026!",
+          email: "student@university.edu",
+          password: "StudentPassword2026!",
         }),
       });
 
@@ -117,10 +153,10 @@ class DentalApiClient {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "sristi.biswal@dental.edu",
-          password: "SristiPassword2026!",
-          full_name: "Sristi Biswal",
-          academic_level: "BDS Dental Scholar",
+          email: "student@university.edu",
+          password: "StudentPassword2026!",
+          full_name: "Student Scholar",
+          academic_level: "University Student",
         }),
       });
 
@@ -232,7 +268,152 @@ class DentalApiClient {
     return await res.json();
   }
 
-  async uploadDocument(file: File): Promise<DentalDocument> {
+  async streamChat(
+    message: string,
+    conversationId?: string,
+    documentId?: string,
+    callbacks?: StreamChatEvents,
+    abortSignal?: AbortSignal
+  ): Promise<void> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/chat`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        message,
+        conversation_id: conversationId,
+        document_id: documentId,
+        stream: true,
+      }),
+      signal: abortSignal,
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      callbacks?.onError?.(`Chat error (${res.status}): ${err}`);
+      return;
+    }
+
+    if (!res.body) {
+      callbacks?.onError?.("ReadableStream is not supported on this response");
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        let currentEvent = "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            currentEvent = "";
+            continue;
+          }
+
+          if (trimmed.startsWith("event:")) {
+            currentEvent = trimmed.slice(6).trim();
+          } else if (trimmed.startsWith("data:")) {
+            const rawData = trimmed.slice(5).trim();
+            try {
+              const payload = JSON.parse(rawData);
+              const eventType = currentEvent || payload.type;
+
+              if (eventType === "message_start") {
+                callbacks?.onStart?.(payload);
+              } else if (eventType === "status") {
+                callbacks?.onStatus?.(payload);
+              } else if (eventType === "citation") {
+                callbacks?.onCitation?.(payload);
+              } else if (eventType === "token") {
+                callbacks?.onToken?.(payload);
+              } else if (eventType === "message_end") {
+                callbacks?.onEnd?.(payload);
+              } else if (eventType === "error") {
+                callbacks?.onError?.(payload.error || "Streaming error");
+              }
+            } catch {
+              // Ignore non-JSON line
+            }
+          }
+        }
+      }
+    } catch (err: unknown) {
+      const e = err as { name?: string; message?: string };
+      if (e?.name === "AbortError") {
+        console.log("Stream generation aborted by user.");
+      } else {
+        callbacks?.onError?.(e?.message || "Stream read error");
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  async getProfile(): Promise<UserProfileData | null> {
+    await this.ensureSession();
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/profile`, {
+        headers: this.getHeaders(),
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.error("Failed to fetch profile:", e);
+    }
+    return null;
+  }
+
+  async updateProfile(data: UserProfileData): Promise<UserProfileData | null> {
+    await this.ensureSession();
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/profile`, {
+        method: "PUT",
+        headers: this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.error("Failed to update profile:", e);
+    }
+    return null;
+  }
+
+  async getMemories(): Promise<LongTermMemoryItem[]> {
+    await this.ensureSession();
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/memories`, {
+        headers: this.getHeaders(),
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.error("Failed to fetch memories:", e);
+    }
+    return [];
+  }
+
+  async deleteMemory(id: string): Promise<boolean> {
+    await this.ensureSession();
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/memories/${id}`, {
+        method: "DELETE",
+        headers: this.getHeaders(),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async uploadDocument(file: File): Promise<StudyDocument> {
     await this.ensureSession();
     const formData = new FormData();
     formData.append("file", file);
@@ -253,7 +434,7 @@ class DentalApiClient {
     return await res.json();
   }
 
-  async getDocuments(): Promise<DentalDocument[]> {
+  async getDocuments(): Promise<StudyDocument[]> {
     await this.ensureSession();
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/documents`, {
@@ -291,4 +472,6 @@ class DentalApiClient {
   }
 }
 
-export const dentalApi = new DentalApiClient();
+export const studyApi = new StudyApiClient();
+export const dentalApi = studyApi;
+export type DentalApiClient = StudyApiClient;

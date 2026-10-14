@@ -126,3 +126,32 @@ class GroqClient(BaseLLMClient):
             except Exception as e:
                 logger.error(f"[Groq Unexpected Error]: {e}")
                 raise
+
+    async def stream_generate(
+        self,
+        messages: List[LLMMessage],
+        model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        timeout: Optional[float] = None,
+    ):
+        """Asynchronously stream tokens from Groq API."""
+        client = self._get_client()
+        target_model = model or self._default_model
+        req_timeout = timeout or self._timeout
+        formatted_messages = [{"role": m.role, "content": m.content} for m in messages]
+
+        stream = await client.chat.completions.create(
+            model=target_model,
+            messages=formatted_messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=req_timeout,
+            stream=True,
+        )
+
+        async for chunk in stream:
+            delta = chunk.choices[0].delta.content if chunk.choices else None
+            if delta:
+                yield delta
+

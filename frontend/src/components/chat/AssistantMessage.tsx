@@ -36,14 +36,14 @@ export function AssistantMessage({
 
   return (
     <div className="flex flex-col w-full mb-8">
-      {/* Sristi AI Avatar */}
+      {/* Assistant Avatar */}
       <div className="flex items-center justify-between mb-2 px-1">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-violet-600 via-indigo-500 to-purple-400 flex items-center justify-center text-white shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-semibold tracking-wide text-[var(--text-primary)]">
-            Sristi AI
+            Study AI
           </span>
         </div>
 
@@ -57,7 +57,7 @@ export function AssistantMessage({
       </div>
 
       {/* Structured Answer Body */}
-      <div className="prose-dental text-sm md:text-[15px] text-[var(--text-primary)] leading-relaxed pl-1 pr-2">
+      <div className="prose-study text-sm md:text-[15px] text-[var(--text-primary)] leading-relaxed pl-1 pr-2">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {content}
         </ReactMarkdown>

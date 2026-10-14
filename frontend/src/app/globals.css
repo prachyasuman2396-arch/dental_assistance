@@ -127,6 +127,7 @@ body {
 }
 
 /* Markdown prose enhancements */
+.prose-study h1, .prose-study h2, .prose-study h3,
 .prose-dental h1, .prose-dental h2, .prose-dental h3 {
   color: var(--text-primary);
   font-weight: 600;
@@ -134,31 +135,37 @@ body {
   margin-bottom: 0.5em;
 }
 
+.prose-study p,
 .prose-dental p {
   color: var(--text-primary);
   line-height: 1.75;
   margin-bottom: 0.85em;
 }
 
+.prose-study strong,
 .prose-dental strong {
   color: var(--primary-violet);
   font-weight: 600;
 }
 
+.dark .prose-study strong,
 .dark .prose-dental strong {
   color: var(--primary-lavender);
 }
 
+.prose-study ul, .prose-study ol,
 .prose-dental ul, .prose-dental ol {
   padding-left: 1.5em;
   margin-bottom: 1em;
 }
 
+.prose-study li,
 .prose-dental li {
   margin-bottom: 0.4em;
   line-height: 1.65;
 }
 
+.prose-study table,
 .prose-dental table {
   width: 100%;
   border-collapse: separate;
@@ -169,6 +176,7 @@ body {
   border: 1px solid var(--border-light);
 }
 
+.prose-study th,
 .prose-dental th {
   background: var(--bg-secondary);
   padding: 10px 14px;
@@ -178,12 +186,14 @@ body {
   border-bottom: 1px solid var(--border-light);
 }
 
+.prose-study td,
 .prose-dental td {
   padding: 10px 14px;
   font-size: 0.875rem;
   border-bottom: 1px solid var(--border-light);
 }
 
+.prose-study code,
 .prose-dental code {
   background: var(--bg-secondary);
   color: var(--primary-violet);
@@ -192,6 +202,7 @@ body {
   font-size: 0.85em;
 }
 
+.dark .prose-study code,
 .dark .prose-dental code {
   color: var(--primary-lavender);
 }

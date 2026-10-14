@@ -1,6 +1,6 @@
 import uuid
 from typing import List, Optional, TYPE_CHECKING
-from sqlalchemy import String, ForeignKey, Integer, BigInteger, Text
+from sqlalchemy import String, ForeignKey, Integer, BigInteger, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin
 
@@ -27,7 +27,16 @@ class Document(Base, TimestampMixin):
     )  # pending, processing, completed, failed
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Ingestion provenance and deduplication metadata
+    content_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    mime_type: Mapped[Optional[str]] = mapped_column(String(100), default="application/pdf", nullable=True)
+    embedding_model: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+
     user: Mapped["User"] = relationship("User", back_populates="documents")
     chunks: Mapped[List["DocumentChunk"]] = relationship(
         "DocumentChunk", back_populates="document", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("ix_documents_content_hash", "user_id", "content_hash"),
     )

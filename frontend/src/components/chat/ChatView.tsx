@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { Sparkles } from "lucide-react";
-import { ChatMessage, DentalDocument } from "@/services/api";
+import { ChatMessage, StudyDocument } from "@/services/api";
 import { LuminousPearl } from "@/components/visual/LuminousPearl";
 import { SuggestedPrompts } from "@/components/chat/SuggestedPrompts";
 import { ChatComposer } from "@/components/chat/ChatComposer";
@@ -13,7 +13,7 @@ interface ChatViewProps {
   messages: ChatMessage[];
   isLoading: boolean;
   onSendMessage: (text: string, documentId?: string, mode?: string) => void;
-  onUploadDocument: (file: File) => Promise<DentalDocument>;
+  onUploadDocument: (file: File) => Promise<StudyDocument>;
   composerText: string;
   onComposerTextChange: (text: string) => void;
 }
@@ -53,7 +53,7 @@ export function ChatView({
             {/* Personalized Welcome Header */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100/60 dark:bg-violet-950/40 border border-violet-200/50 dark:border-violet-800/40 text-violet-700 dark:text-violet-300 text-xs font-semibold mb-3">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Hey Sristi ✨</span>
+              <span>Welcome back ✨</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-[var(--text-primary)] mb-2">
@@ -61,7 +61,7 @@ export function ChatView({
             </h1>
 
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-lg mb-4 leading-relaxed">
-              Your space to explore dentistry, understand the complex, and discover something new.
+              Your space to master concepts, prepare for exams, and explore academic research.
             </p>
 
             {/* 4 Suggested Action Cards */}
@@ -92,7 +92,7 @@ export function ChatView({
             {isLoading && (
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-black/3 dark:bg-white/5 border border-[var(--border-light)] w-fit mb-6 text-xs text-[var(--text-muted)] animate-pulse">
                 <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                <span>Sristi AI is preparing your explanation...</span>
+                <span>Study AI is preparing your explanation...</span>
               </div>
             )}
 

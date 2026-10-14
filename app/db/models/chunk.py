@@ -26,6 +26,12 @@ class DocumentChunk(Base, TimestampMixin):
     page_number: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+
+    # Hierarchical and structure-aware RAG columns
+    parent_chunk_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    section_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    page_start: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    page_end: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
     # pgvector embedding column
     embedding: Mapped[Optional[list]] = mapped_column(
@@ -37,4 +43,5 @@ class DocumentChunk(Base, TimestampMixin):
 
     __table_args__ = (
         Index("ix_doc_chunk_user_doc", "user_id", "document_id"),
+        Index("ix_doc_chunks_parent_chunk_id", "parent_chunk_id"),
     )

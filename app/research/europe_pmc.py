@@ -14,10 +14,8 @@ class EuropePMCClient:
     async def search(self, query: str, max_results: int = 5) -> List[ResearchArticle]:
         async with httpx.AsyncClient(timeout=15.0) as client:
             try:
-                # Add dental domain restriction to search query
-                enhanced_query = f"{query} AND (dental OR oral OR dentistry)"
                 params = {
-                    "query": enhanced_query,
+                    "query": query,
                     "format": "json",
                     "pageSize": max_results,
                     "resultType": "core",

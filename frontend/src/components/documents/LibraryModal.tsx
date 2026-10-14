@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { X, BookOpen, Upload, FileText, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import { dentalApi, DentalDocument } from "@/services/api";
+import { studyApi, StudyDocument } from "@/services/api";
 
 interface LibraryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectDocumentForChat?: (doc: DentalDocument) => void;
+  onSelectDocumentForChat?: (doc: StudyDocument) => void;
 }
 
 export function LibraryModal({ isOpen, onClose, onSelectDocumentForChat }: LibraryModalProps) {
-  const [documents, setDocuments] = useState<DentalDocument[]>([]);
+  const [documents, setDocuments] = useState<StudyDocument[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function LibraryModal({ isOpen, onClose, onSelectDocumentForChat }: Libra
   }, [isOpen]);
 
   const loadDocs = async () => {
-    const docs = await dentalApi.getDocuments();
+    const docs = await studyApi.getDocuments();
     setDocuments(docs);
   };
 
@@ -31,7 +31,7 @@ export function LibraryModal({ isOpen, onClose, onSelectDocumentForChat }: Libra
 
     try {
       setIsUploading(true);
-      await dentalApi.uploadDocument(file);
+      await studyApi.uploadDocument(file);
       await loadDocs();
     } catch {
       alert("Failed to upload PDF. Please verify size (max 25MB).");
@@ -74,7 +74,7 @@ export function LibraryModal({ isOpen, onClose, onSelectDocumentForChat }: Libra
         <div className="p-4 border-b border-[var(--border-light)] bg-black/2 dark:bg-white/2">
           <label className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl border-2 border-dashed border-violet-300 dark:border-violet-700 hover:border-violet-500 cursor-pointer transition-colors text-xs font-medium text-violet-700 dark:text-violet-300">
             <Upload className="w-4 h-4" />
-            <span>{isUploading ? "Adding to your study library..." : "Upload Dental Textbook or Notes (PDF)"}</span>
+            <span>{isUploading ? "Adding to your study library..." : "Upload Textbook or Notes (PDF)"}</span>
             <input
               type="file"
               accept=".pdf"
@@ -89,7 +89,7 @@ export function LibraryModal({ isOpen, onClose, onSelectDocumentForChat }: Libra
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
           {documents.length === 0 ? (
             <div className="text-center py-10 text-xs text-[var(--text-muted)]">
-              No dental documents uploaded yet. Upload lecture notes or textbooks above.
+              No study documents uploaded yet. Upload lecture notes or textbooks above.
             </div>
           ) : (
             documents.map((doc) => (

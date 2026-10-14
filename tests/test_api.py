@@ -34,7 +34,7 @@ async def test_root_and_health_endpoints():
         # Test Root
         root_res = await client.get("/")
         assert root_res.status_code == 200
-        assert "Dental AI Study & Research Assistant" in root_res.json()["message"]
+        assert "Study & Research Assistant" in root_res.json()["message"]
 
         # Test Health
         health_res = await client.get("/health")

@@ -187,3 +187,70 @@ class LLMRouter:
                     raise fallback_error
             else:
                 raise primary_error
+
+    async def stream_with_fallback(
+        self,
+        task_type: TaskType,
+        messages: List[LLMMessage],
+        complexity: ComplexityLevel = ComplexityLevel.LOW,
+        context_length: int = 0,
+        required_capabilities: Optional[List[Capability]] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+    ):
+        """
+        Asynchronously stream tokens with automatic provider routing and fallback.
+        """
+        routing_info = self.select_provider(
+            task_type=task_type,
+            complexity=complexity,
+            context_length=context_length,
+            required_capabilities=required_capabilities,
+        )
+
+        primary_client = (
+            self.groq_client if routing_info.provider == ProviderName.GROQ else self.gemini_client
+        )
+
+        tokens_yielded = 0
+        try:
+            async for token in primary_client.stream_generate(
+                messages=messages,
+                model=routing_info.model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=routing_info.timeout_seconds,
+            ):
+                tokens_yielded += 1
+                yield {
+                    "token": token,
+                    "provider": routing_info.provider.value,
+                    "model": routing_info.model,
+                }
+        except Exception as primary_error:
+            logger.warning(
+                f"Primary streaming provider {routing_info.provider.value} failed: {primary_error} (tokens_yielded={tokens_yielded})"
+            )
+            if tokens_yielded == 0 and routing_info.fallback_provider and routing_info.fallback_model:
+                fallback_client = (
+                    self.groq_client
+                    if routing_info.fallback_provider == ProviderName.GROQ
+                    else self.gemini_client
+                )
+                logger.info(
+                    f"Switching streaming to fallback {routing_info.fallback_provider.value} ({routing_info.fallback_model})"
+                )
+                async for token in fallback_client.stream_generate(
+                    messages=messages,
+                    model=routing_info.fallback_model,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                ):
+                    yield {
+                        "token": token,
+                        "provider": routing_info.fallback_provider.value,
+                        "model": routing_info.fallback_model,
+                    }
+            else:
+                raise primary_error
+

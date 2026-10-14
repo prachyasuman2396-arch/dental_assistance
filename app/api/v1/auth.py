@@ -15,7 +15,7 @@ class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str
     full_name: Optional[str] = None
-    academic_level: str = "Dental Student"
+    academic_level: str = "Student"
 
 
 class UserLoginRequest(BaseModel):

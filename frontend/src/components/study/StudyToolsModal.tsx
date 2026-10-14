@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X, GraduationCap, Sparkles, CheckCircle2, HelpCircle } from "lucide-react";
-import { dentalApi, QuizQuestion, Flashcard } from "@/services/api";
+import { studyApi, QuizQuestion, Flashcard } from "@/services/api";
 
 interface StudyToolsModalProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface StudyToolsModalProps {
 
 export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
   const [activeTab, setActiveTab] = useState<"quiz" | "flashcards">("quiz");
-  const [topic, setTopic] = useState("Endodontic Diagnosis & Pathology");
+  const [topic, setTopic] = useState("Cellular Respiration & Metabolism");
   const [isLoading, setIsLoading] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -23,7 +23,7 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
   const handleGenerateQuiz = async () => {
     try {
       setIsLoading(true);
-      const res = await dentalApi.generateQuiz(topic, 3);
+      const res = await studyApi.generateQuiz(topic, 3);
       setQuizQuestions(res);
       setSelectedAnswers({});
     } catch {
@@ -36,7 +36,7 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
   const handleGenerateFlashcards = async () => {
     try {
       setIsLoading(true);
-      const res = await dentalApi.generateFlashcards(topic, 4);
+      const res = await studyApi.generateFlashcards(topic, 4);
       setFlashcards(res);
       setRevealedFlashcards({});
     } catch {
@@ -57,10 +57,10 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
             </div>
             <div>
               <h2 className="font-semibold text-base text-[var(--text-primary)]">
-                Dental Exam Preparation & Study Tools
+                Exam Preparation & Study Tools
               </h2>
               <p className="text-xs text-[var(--text-muted)]">
-                Practice board exam MCQs and active-recall flashcards
+                Practice high-yield exam MCQs and active-recall flashcards
               </p>
             </div>
           </div>
@@ -84,7 +84,7 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
                   : "bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
             >
-              Board Exam MCQs
+              Exam MCQs
             </button>
             <button
               onClick={() => setActiveTab("flashcards")}
@@ -103,7 +103,7 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="Enter dental subject or topic..."
+              placeholder="Enter subject or study topic..."
               className="flex-1 px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-[var(--border-light)] text-xs text-[var(--text-primary)] outline-none focus:border-violet-400"
             />
             <button
@@ -129,7 +129,7 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
             <>
               {quizQuestions.length === 0 ? (
                 <div className="text-center py-12 text-xs text-[var(--text-muted)]">
-                  Enter a dental topic and click Generate to practice high-yield MCQs.
+                  Enter a study topic and click Generate to practice high-yield MCQs.
                 </div>
               ) : (
                 quizQuestions.map((q, idx) => {

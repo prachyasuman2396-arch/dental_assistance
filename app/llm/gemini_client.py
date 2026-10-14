@@ -131,3 +131,42 @@ class GeminiClient(BaseLLMClient):
             except Exception as e:
                 logger.error(f"[Gemini Unexpected Error]: {e}")
                 raise
+
+    async def stream_generate(
+        self,
+        messages: List[LLMMessage],
+        model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        timeout: Optional[float] = None,
+    ):
+        """Asynchronously stream tokens from Gemini API."""
+        client = self._get_client()
+        target_model = model or self._default_model
+
+        system_instruction = None
+        user_contents = []
+
+        for msg in messages:
+            if msg.role == "system":
+                system_instruction = msg.content
+            else:
+                user_contents.append(f"{msg.role.capitalize()}: {msg.content}")
+
+        combined_prompt = "\n\n".join(user_contents)
+        config = types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            temperature=temperature,
+            max_output_tokens=max_tokens,
+        )
+
+        response_stream = await client.aio.models.generate_content_stream(
+            model=target_model,
+            contents=combined_prompt,
+            config=config,
+        )
+
+        async for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
+

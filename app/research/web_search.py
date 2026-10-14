@@ -19,7 +19,7 @@ class WebSearchClient:
             try:
                 payload = {
                     "api_key": self.api_key,
-                    "query": f"{query} dental dentistry guidelines",
+                    "query": query,
                     "search_depth": "advanced",
                     "include_answer": False,
                     "max_results": max_results,
