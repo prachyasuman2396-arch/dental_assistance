@@ -103,10 +103,11 @@ class HybridRetriever:
         rrf_k: int = 60,
         enable_reranking: bool = True,
         enable_compression: bool = True,
+        enable_parent_expansion: bool = True,
     ) -> List[RetrievedChunk]:
         """
         High-level retrieval interface matching Graph Nodes signature.
-        Executes parallel dense + BM25, RRF fusion, reranking, and compression.
+        Executes parallel dense + BM25, RRF fusion, reranking, parent expansion, and compression.
         """
         chunks, _metrics, _evaluation = await self.pipeline_retrieve(
             query=query,
@@ -118,6 +119,7 @@ class HybridRetriever:
             rrf_k=rrf_k,
             enable_reranking=enable_reranking,
             enable_compression=enable_compression,
+            enable_parent_expansion=enable_parent_expansion,
         )
         return chunks
 
@@ -132,6 +134,7 @@ class HybridRetriever:
         rrf_k: int = 60,
         enable_reranking: bool = True,
         enable_compression: bool = True,
+        enable_parent_expansion: bool = True,
         allow_recovery: bool = True,
     ) -> Tuple[List[RetrievedChunk], RetrievalMetrics, SufficiencyEvaluation]:
         """
@@ -201,6 +204,10 @@ class HybridRetriever:
             candidates_to_rerank = reranked
 
         selected_candidates = candidates_to_rerank[:top_k]
+
+        # 3b. Parent-child context expansion
+        if enable_parent_expansion and selected_candidates:
+            selected_candidates = await self._expand_parent_context(selected_candidates, user_id)
 
         # 4. Contextual Compression
         final_evidence = selected_candidates
@@ -347,6 +354,8 @@ class HybridRetriever:
 
         for score, chunk_obj, filename in scored_rows[:limit]:
             normalized_score = round(score / max_score, 4) if max_score > 0 else 0.0
+            p_id = getattr(chunk_obj, "parent_chunk_id", None)
+            sec_t = getattr(chunk_obj, "section_title", None)
             results.append(
                 RetrievedChunk(
                     chunk_id=chunk_obj.id,
@@ -356,7 +365,48 @@ class HybridRetriever:
                     content=chunk_obj.content,
                     similarity_score=normalized_score,
                     metadata=chunk_obj.chunk_metadata or {},
+                    parent_chunk_id=p_id if isinstance(p_id, str) else None,
+                    section_title=sec_t if isinstance(sec_t, str) else None,
                 )
             )
 
         return results
+
+    async def _expand_parent_context(
+        self,
+        candidates: List[RetrievedChunk],
+        user_id: str,
+    ) -> List[RetrievedChunk]:
+        """
+        Parent-child retrieval context expansion:
+        If a retrieved chunk has a parent_chunk_id, fetch the surrounding parent
+        chunk to supply complete structural context for grounded answer synthesis.
+        """
+        parent_ids = list({c.parent_chunk_id for c in candidates if c.parent_chunk_id})
+        if not parent_ids:
+            return candidates
+
+        try:
+            stmt = select(DocumentChunk).where(
+                and_(
+                    DocumentChunk.id.in_(parent_ids),
+                    DocumentChunk.user_id == user_id,
+                )
+            )
+            res = await self.session.execute(stmt)
+            parent_chunks = {p.id: p.content for p in res.scalars().all()}
+        except Exception as e:
+            logger.debug(f"Parent chunk expansion lookup failed: {e}")
+            return candidates
+
+        expanded: List[RetrievedChunk] = []
+        for c in candidates:
+            if c.parent_chunk_id and c.parent_chunk_id in parent_chunks:
+                parent_text = parent_chunks[c.parent_chunk_id]
+                c_copy = c.model_copy()
+                c_copy.content = f"{parent_text}\n\n[Matching Granular Passage: {c.content}]"
+                expanded.append(c_copy)
+            else:
+                expanded.append(c)
+
+        return expanded

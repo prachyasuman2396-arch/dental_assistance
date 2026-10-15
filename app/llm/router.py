@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from app.llm.schemas import (
     TaskType,
     ComplexityLevel,
@@ -23,6 +23,47 @@ class LLMRouter:
     ):
         self.groq_client = groq_client or GroqClient()
         self.gemini_client = gemini_client or GeminiClient()
+        self._provider_health: Dict[str, bool] = {"groq": True, "gemini": True}
+        self._metrics: Dict[str, Any] = {
+            "total_requests": 0,
+            "fallback_events": 0,
+            "provider_requests": {"groq": 0, "gemini": 0},
+            "errors": 0,
+        }
+
+    def record_success(self, provider: str) -> None:
+        p = provider.lower()
+        self._provider_health[p] = True
+        if p in self._metrics["provider_requests"]:
+            self._metrics["provider_requests"][p] += 1
+        self._metrics["total_requests"] += 1
+
+    def record_failure(self, provider: str) -> None:
+        p = provider.lower()
+        self._provider_health[p] = False
+        self._metrics["errors"] += 1
+
+    def get_metrics(self) -> Dict[str, Any]:
+        return {**self._metrics, "provider_health": dict(self._provider_health)}
+
+    def select_model(
+        self,
+        task_type: TaskType,
+        complexity: ComplexityLevel = ComplexityLevel.LOW,
+        context_length: int = 0,
+        required_capabilities: Optional[List[Capability]] = None,
+        provider_health: Optional[Dict[str, bool]] = None,
+    ) -> SelectedModelInfo:
+        """
+        Standard interface for intelligent model and provider selection.
+        """
+        return self.select_provider(
+            task_type=task_type,
+            complexity=complexity,
+            context_length=context_length,
+            required_capabilities=required_capabilities,
+            provider_health=provider_health,
+        )
 
     def select_provider(
         self,
@@ -37,7 +78,7 @@ class LLMRouter:
         complexity, context window, required capabilities, and provider health.
         """
         req_caps = set(required_capabilities or [])
-        health = provider_health or {}
+        health = {**self._provider_health, **(provider_health or {})}
         groq_healthy = health.get("groq", True)
         gemini_healthy = health.get("gemini", True)
 
@@ -152,19 +193,23 @@ class LLMRouter:
         )
 
         try:
-            return await primary_client.generate(
+            resp = await primary_client.generate(
                 messages=messages,
                 model=routing_info.model,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 timeout=routing_info.timeout_seconds,
             )
+            self.record_success(routing_info.provider.value)
+            return resp
         except Exception as primary_error:
+            self.record_failure(routing_info.provider.value)
             logger.warning(
                 f"Primary provider {routing_info.provider.value} failed: {primary_error}. Evaluating fallback..."
             )
 
             if routing_info.fallback_provider and routing_info.fallback_model:
+                self._metrics["fallback_events"] += 1
                 fallback_client = (
                     self.groq_client
                     if routing_info.fallback_provider == ProviderName.GROQ
@@ -174,13 +219,16 @@ class LLMRouter:
                     f"Switching to fallback provider {routing_info.fallback_provider.value} (model={routing_info.fallback_model})"
                 )
                 try:
-                    return await fallback_client.generate(
+                    fallback_resp = await fallback_client.generate(
                         messages=messages,
                         model=routing_info.fallback_model,
                         temperature=temperature,
                         max_tokens=max_tokens,
                     )
+                    self.record_success(routing_info.fallback_provider.value)
+                    return fallback_resp
                 except Exception as fallback_error:
+                    self.record_failure(routing_info.fallback_provider.value)
                     logger.error(
                         f"Fallback provider {routing_info.fallback_provider.value} also failed: {fallback_error}"
                     )
@@ -227,11 +275,14 @@ class LLMRouter:
                     "provider": routing_info.provider.value,
                     "model": routing_info.model,
                 }
+            self.record_success(routing_info.provider.value)
         except Exception as primary_error:
+            self.record_failure(routing_info.provider.value)
             logger.warning(
                 f"Primary streaming provider {routing_info.provider.value} failed: {primary_error} (tokens_yielded={tokens_yielded})"
             )
             if tokens_yielded == 0 and routing_info.fallback_provider and routing_info.fallback_model:
+                self._metrics["fallback_events"] += 1
                 fallback_client = (
                     self.groq_client
                     if routing_info.fallback_provider == ProviderName.GROQ
@@ -240,17 +291,22 @@ class LLMRouter:
                 logger.info(
                     f"Switching streaming to fallback {routing_info.fallback_provider.value} ({routing_info.fallback_model})"
                 )
-                async for token in fallback_client.stream_generate(
-                    messages=messages,
-                    model=routing_info.fallback_model,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                ):
-                    yield {
-                        "token": token,
-                        "provider": routing_info.fallback_provider.value,
-                        "model": routing_info.fallback_model,
-                    }
+                try:
+                    async for token in fallback_client.stream_generate(
+                        messages=messages,
+                        model=routing_info.fallback_model,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    ):
+                        yield {
+                            "token": token,
+                            "provider": routing_info.fallback_provider.value,
+                            "model": routing_info.fallback_model,
+                        }
+                    self.record_success(routing_info.fallback_provider.value)
+                except Exception as fallback_error:
+                    self.record_failure(routing_info.fallback_provider.value)
+                    raise fallback_error
             else:
                 raise primary_error
 

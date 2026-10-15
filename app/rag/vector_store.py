@@ -16,6 +16,8 @@ class RetrievedChunk(BaseModel):
     content: str
     similarity_score: float
     metadata: Dict[str, Any] = {}
+    parent_chunk_id: Optional[str] = None
+    section_title: Optional[str] = None
 
 
 class PgVectorRetriever:
@@ -94,6 +96,9 @@ class PgVectorRetriever:
                 continue
             seen_texts.add(snippet_key)
 
+            p_id = getattr(chunk_obj, "parent_chunk_id", None)
+            sec_t = getattr(chunk_obj, "section_title", None)
+
             chunks.append(
                 RetrievedChunk(
                     chunk_id=chunk_obj.id,
@@ -103,6 +108,8 @@ class PgVectorRetriever:
                     content=chunk_obj.content,
                     similarity_score=round(similarity, 4),
                     metadata=chunk_obj.chunk_metadata or {},
+                    parent_chunk_id=p_id if isinstance(p_id, str) else None,
+                    section_title=sec_t if isinstance(sec_t, str) else None,
                 )
             )
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, GraduationCap, Sparkles, CheckCircle2, HelpCircle } from "lucide-react";
+import { X, GraduationCap, Sparkles, CheckCircle2, HelpCircle, Calendar, MessageSquare } from "lucide-react";
 import { studyApi, QuizQuestion, Flashcard } from "@/services/api";
 
 interface StudyToolsModalProps {
@@ -10,37 +10,40 @@ interface StudyToolsModalProps {
 }
 
 export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
-  const [activeTab, setActiveTab] = useState<"quiz" | "flashcards">("quiz");
+  const [activeTab, setActiveTab] = useState<"quiz" | "flashcards" | "viva" | "plan">("quiz");
   const [topic, setTopic] = useState("Cellular Respiration & Metabolism");
   const [isLoading, setIsLoading] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [vivaItems, setVivaItems] = useState<any[]>([]);
+  const [studyPlan, setStudyPlan] = useState<any | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [revealedFlashcards, setRevealedFlashcards] = useState<Record<number, boolean>>({});
 
   if (!isOpen) return null;
 
-  const handleGenerateQuiz = async () => {
+  const handleGenerate = async () => {
+    if (!topic.trim()) return;
     try {
       setIsLoading(true);
-      const res = await studyApi.generateQuiz(topic, 3);
-      setQuizQuestions(res);
-      setSelectedAnswers({});
-    } catch {
-      alert("Failed to generate quiz questions.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGenerateFlashcards = async () => {
-    try {
-      setIsLoading(true);
-      const res = await studyApi.generateFlashcards(topic, 4);
-      setFlashcards(res);
-      setRevealedFlashcards({});
-    } catch {
-      alert("Failed to generate flashcards.");
+      if (activeTab === "quiz") {
+        const res = await studyApi.generateQuiz(topic, 3);
+        setQuizQuestions(res);
+        setSelectedAnswers({});
+      } else if (activeTab === "flashcards") {
+        const res = await studyApi.generateFlashcards(topic, 4);
+        setFlashcards(res);
+        setRevealedFlashcards({});
+      } else if (activeTab === "viva") {
+        const res = await studyApi.generateViva(topic, 3);
+        setVivaItems(res);
+      } else if (activeTab === "plan") {
+        const res = await studyApi.generateStudyPlan(topic, 4, 12);
+        setStudyPlan(res);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate study materials. Please check your backend connection.");
     } finally {
       setIsLoading(false);
     }
@@ -57,10 +60,10 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
             </div>
             <div>
               <h2 className="font-semibold text-base text-[var(--text-primary)]">
-                Exam Preparation & Study Tools
+                Exam Preparation & Study Workflows
               </h2>
               <p className="text-xs text-[var(--text-muted)]">
-                Practice high-yield exam MCQs and active-recall flashcards
+                Practice high-yield MCQs, active-recall flashcards, viva voce, and study schedules
               </p>
             </div>
           </div>
@@ -75,10 +78,10 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
 
         {/* Tab & Generator Controls */}
         <div className="p-5 border-b border-[var(--border-light)] space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
               onClick={() => setActiveTab("quiz")}
-              className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+              className={`py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
                 activeTab === "quiz"
                   ? "bg-violet-600 text-white shadow-sm"
                   : "bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -88,13 +91,33 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
             </button>
             <button
               onClick={() => setActiveTab("flashcards")}
-              className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+              className={`py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
                 activeTab === "flashcards"
                   ? "bg-violet-600 text-white shadow-sm"
                   : "bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
             >
-              Active Recall Flashcards
+              Flashcards
+            </button>
+            <button
+              onClick={() => setActiveTab("viva")}
+              className={`py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                activeTab === "viva"
+                  ? "bg-violet-600 text-white shadow-sm"
+                  : "bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              Oral Viva
+            </button>
+            <button
+              onClick={() => setActiveTab("plan")}
+              className={`py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                activeTab === "plan"
+                  ? "bg-violet-600 text-white shadow-sm"
+                  : "bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              Study Plan
             </button>
           </div>
 
@@ -107,7 +130,7 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
               className="flex-1 px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-[var(--border-light)] text-xs text-[var(--text-primary)] outline-none focus:border-violet-400"
             />
             <button
-              onClick={activeTab === "quiz" ? handleGenerateQuiz : handleGenerateFlashcards}
+              onClick={handleGenerate}
               disabled={isLoading || !topic.trim()}
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-medium shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
@@ -210,6 +233,80 @@ export function StudyToolsModal({ isOpen, onClose }: StudyToolsModalProps) {
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "viva" && (
+            <>
+              {vivaItems.length === 0 ? (
+                <div className="text-center py-12 text-xs text-[var(--text-muted)]">
+                  Enter a topic and click Generate to practice oral examination viva questions.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {vivaItems.map((v, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl glass-panel space-y-2.5 text-xs border border-[var(--border-light)]">
+                      <div className="font-semibold text-sm text-[var(--text-primary)] flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-violet-500" />
+                        <span>Viva Question {idx + 1}: {v.viva_question}</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] leading-relaxed">
+                        <strong className="text-[var(--text-primary)]">Model Answer: </strong>
+                        {v.model_answer}
+                      </div>
+                      {v.key_examiner_points && v.key_examiner_points.length > 0 && (
+                        <div className="text-[11px] text-violet-600 dark:text-violet-300">
+                          <strong>Must-Know Points: </strong>
+                          {v.key_examiner_points.join(" • ")}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "plan" && (
+            <>
+              {!studyPlan ? (
+                <div className="text-center py-12 text-xs text-[var(--text-muted)]">
+                  Enter your target subject or examination and click Generate to build a multi-week study schedule.
+                </div>
+              ) : (
+                <div className="space-y-4 text-xs">
+                  <div className="p-4 rounded-2xl glass-panel space-y-2 border border-violet-200 dark:border-violet-800">
+                    <div className="font-semibold text-sm text-violet-700 dark:text-violet-300 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>{studyPlan.subject} — {studyPlan.total_weeks || 4}-Week Master Study Plan</span>
+                    </div>
+                    {studyPlan.exam_revision_strategy && (
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        <strong>Strategy: </strong> {studyPlan.exam_revision_strategy}
+                      </p>
+                    )}
+                  </div>
+
+                  {Array.isArray(studyPlan.weekly_plan) && studyPlan.weekly_plan.map((wk: any, idx: number) => (
+                    <div key={idx} className="p-3.5 rounded-xl glass-panel space-y-2 border border-[var(--border-light)]">
+                      <div className="font-semibold text-xs text-[var(--text-primary)] flex justify-between">
+                        <span>Week {wk.week_number || idx + 1}: {wk.theme}</span>
+                        {wk.recommended_hours && <span className="text-violet-500">{wk.recommended_hours} hrs/wk</span>}
+                      </div>
+                      {wk.learning_objectives && (
+                        <div className="text-[11px] text-[var(--text-secondary)]">
+                          <strong>Objectives: </strong> {Array.isArray(wk.learning_objectives) ? wk.learning_objectives.join("; ") : wk.learning_objectives}
+                        </div>
+                      )}
+                      {wk.key_activities && (
+                        <div className="text-[11px] text-[var(--text-muted)]">
+                          <strong>Key Tasks: </strong> {Array.isArray(wk.key_activities) ? wk.key_activities.join(" • ") : wk.key_activities}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </>

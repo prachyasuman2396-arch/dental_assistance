@@ -1,0 +1,56 @@
+[
+  {
+    "id": "MED-001",
+    "discipline": "Medicine",
+    "topic": "Cardiovascular Physiology",
+    "question": "Explain the Frank-Starling mechanism and how changes in end-diastolic volume modulate ventricular stroke volume.",
+    "expected_answer_keywords": ["preload", "sarcomere length", "actin-myosin cross-bridge", "stroke volume", "end-diastolic volume"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "ENG-001",
+    "discipline": "Computer Science / Engineering",
+    "topic": "Distributed Consensus",
+    "question": "How does the Raft consensus algorithm handle leader election when a split vote occurs?",
+    "expected_answer_keywords": ["randomized election timeout", "heartbeat", "candidate", "split vote", "term number"],
+    "requires_research": false,
+    "complexity": "high"
+  },
+  {
+    "id": "SCI-001",
+    "discipline": "Physics / Chemistry",
+    "topic": "Thermodynamics",
+    "question": "Derive the relationship between Gibbs free energy change and the equilibrium constant in a closed reversible reaction.",
+    "expected_answer_keywords": ["delta G", "standard Gibbs energy", "RT ln K", "equilibrium constant", "chemical potential"],
+    "requires_research": false,
+    "complexity": "high"
+  },
+  {
+    "id": "COM-001",
+    "discipline": "Commerce / Economics",
+    "topic": "Monetary Policy & Inflation",
+    "question": "How does an increase in central bank policy rates transmit through the banking channel to dampen aggregate demand?",
+    "expected_answer_keywords": ["interest rate transmission", "borrowing costs", "consumption", "investment", "credit creation"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "HUM-001",
+    "discipline": "Humanities / Philosophy",
+    "topic": "Ethics",
+    "question": "Contrast Kant's categorical imperative with utilitarian consequentialism in ethical decision-making.",
+    "expected_answer_keywords": ["deontology", "universalizability", "duty", "utility maximization", "ends versus means"],
+    "requires_research": false,
+    "complexity": "medium"
+  },
+  {
+    "id": "SCHOLAR-001",
+    "discipline": "Biomedical Sciences",
+    "topic": "CRISPR Gene Editing",
+    "question": "What does recent peer-reviewed literature conclude regarding off-target cleavage mitigation in prime editing vs traditional Cas9?",
+    "expected_answer_keywords": ["prime editing", "pegRNA", "reverse transcriptase", "nicking", "off-target frequency"],
+    "requires_research": true,
+    "complexity": "high"
+  }
+]

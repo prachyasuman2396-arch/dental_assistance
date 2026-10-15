@@ -470,6 +470,94 @@ class StudyApiClient {
     if (!res.ok) throw new Error("Failed to generate flashcards");
     return await res.json();
   }
+
+  async generateViva(topic: string, count = 3, difficulty = "medium"): Promise<any[]> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/study/viva`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({ topic, count, difficulty }),
+    });
+
+    if (!res.ok) throw new Error("Failed to generate viva questions");
+    return await res.json();
+  }
+
+  async generateStudyPlan(subject: string, durationWeeks = 4, hoursPerWeek = 10): Promise<any> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/study/plan`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({ subject, duration_weeks: durationWeeks, hours_per_week: hoursPerWeek }),
+    });
+
+    if (!res.ok) throw new Error("Failed to generate study plan");
+    return await res.json();
+  }
+
+  async generateRevisionSummary(topic: string): Promise<{ topic: string; summary: string }> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/study/summary`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({ topic }),
+    });
+
+    if (!res.ok) throw new Error("Failed to generate revision summary");
+    return await res.json();
+  }
+
+  async generateDerivation(concept: string): Promise<{ concept: string; derivation: string }> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/study/derivation`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({ concept }),
+    });
+
+    if (!res.ok) throw new Error("Failed to generate derivation");
+    return await res.json();
+  }
+
+  async generateTopicComparison(topicA: string, topicB: string): Promise<{ topic_a: string; topic_b: string; comparison: string }> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/study/compare`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({ topic_a: topicA, topic_b: topicB }),
+    });
+
+    if (!res.ok) throw new Error("Failed to generate topic comparison");
+    return await res.json();
+  }
+
+  async listMcpTools(category?: string): Promise<any[]> {
+    await this.ensureSession();
+    const url = category
+      ? `${API_BASE_URL}/api/v1/mcp/tools?category=${encodeURIComponent(category)}`
+      : `${API_BASE_URL}/api/v1/mcp/tools`;
+    const res = await fetch(url, { headers: this.getHeaders() });
+    if (!res.ok) return [];
+    return await res.json();
+  }
+
+  async executeMcpTool(toolName: string, args: Record<string, any> = {}, conversationId?: string): Promise<any> {
+    await this.ensureSession();
+    const res = await fetch(`${API_BASE_URL}/api/v1/mcp/execute`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        tool_name: toolName,
+        arguments: args,
+        conversation_id: conversationId,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`MCP tool execution failed (${res.status}): ${err}`);
+    }
+    return await res.json();
+  }
 }
 
 export const studyApi = new StudyApiClient();
